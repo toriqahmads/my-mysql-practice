@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 05, 2018 at 07:02 AM
+-- Generation Time: Jun 10, 2018 at 05:27 PM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 7.1.1
 
@@ -19,8 +19,66 @@ SET time_zone = "+00:00";
 --
 -- Database: `qcount`
 --
-CREATE DATABASE qcount;
-USE qcount;
+
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `input_data_caleg` (IN `fname` VARCHAR(15), IN `lname` VARCHAR(15), IN `partai` INT(2), IN `dapil` INT(2), IN `prov` INT(2), IN `kab` INT(2), IN `kel` INT(2))  BEGIN
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+ROLLBACK;
+
+START TRANSACTION;
+
+INSERT INTO caleg (nama_depan, nama_belakang, id_partai, id_dapil, id_prov, id_kab, id_kel) VALUES (fname, lname, partai, dapil, prov, kab, kel);
+
+COMMIT;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `input_data_saksi` (IN `fname` VARCHAR(15), IN `lname` VARCHAR(15), IN `sex` CHAR(1), IN `alamat` VARCHAR(30), IN `kel` INT(4), IN `kec` INT(2), IN `kab` INT(2), IN `prov` INT(2), IN `dapil` INT(2), IN `nomor_nik` VARCHAR(16), IN `photo` VARCHAR(30), IN `telpon` VARCHAR(13))  BEGIN
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+ROLLBACK;
+
+START TRANSACTION;
+
+INSERT INTO saksi (nama_depan, nama_belakang, gender, alamat, id_kel, id_kec, id_kab, id_prov, id_dapil, nik, foto, telp)
+VALUES (fname, lname, sex, alamat, kel, kec, kab, prov, dapil, nomor_nik, photo, telpon);
+
+COMMIT;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `input_proof` (IN `photo` TEXT, IN `lokasi` VARCHAR(100), IN `dapil` INT(2), IN `kel` INT(2), IN `saksi` INT(3))  BEGIN
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+ROLLBACK;
+
+START TRANSACTION;
+
+INSERT INTO proof (foto, location, id_dapil, id_kel, id_saksi, tanggal) VALUES (photo, lokasi, dapil, kel, saksi, NOW());
+
+COMMIT;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `input_suara` (IN `j_suara` INT(7), IN `caleg` INT(2), IN `saksi` INT(3))  BEGIN
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+ROLLBACK;
+
+START TRANSACTION;
+
+INSERT INTO suara (suara, id_caleg, id_saksi, tanggal) VALUES (j_suara, caleg, saksi, NOW());
+
+COMMIT;
+
+END$$
+
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
@@ -37,6 +95,13 @@ CREATE TABLE `caleg` (
   `id_kab` int(2) DEFAULT NULL,
   `id_kel` int(2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `caleg`
+--
+
+INSERT INTO `caleg` (`id`, `nama_depan`, `nama_belakang`, `id_partai`, `id_dapil`, `id_prov`, `id_kab`, `id_kel`) VALUES
+(1, 'Muhammad', 'Husni', 1, 1, 1, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -129,6 +194,13 @@ CREATE TABLE `kel` (
   `id_prov` int(2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `kel`
+--
+
+INSERT INTO `kel` (`id`, `kel`, `pos`, `id_kec`, `id_kab`, `id_prov`) VALUES
+(1, 'Demak', 59511, 1, 1, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -139,6 +211,13 @@ CREATE TABLE `partai` (
   `id` int(2) NOT NULL,
   `partai` varchar(15) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `partai`
+--
+
+INSERT INTO `partai` (`id`, `partai`) VALUES
+(1, 'Demokrat');
 
 -- --------------------------------------------------------
 
@@ -151,8 +230,17 @@ CREATE TABLE `proof` (
   `foto` text,
   `location` varchar(100) DEFAULT NULL,
   `id_dapil` int(2) DEFAULT NULL,
-  `id_kel` int(2) DEFAULT NULL
+  `id_kel` int(2) DEFAULT NULL,
+  `id_saksi` int(3) DEFAULT NULL,
+  `tanggal` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `proof`
+--
+
+INSERT INTO `proof` (`id`, `foto`, `location`, `id_dapil`, `id_kel`, `id_saksi`, `tanggal`) VALUES
+(2, 'sakdhkagsdbckdjf', 'images.jpg', 1, 1, 1, '2018-06-09 17:22:04');
 
 -- --------------------------------------------------------
 
@@ -189,10 +277,18 @@ CREATE TABLE `saksi` (
   `id_kab` int(2) DEFAULT NULL,
   `id_prov` int(2) DEFAULT NULL,
   `id_dapil` int(2) DEFAULT NULL,
-  `nik` int(16) DEFAULT NULL,
+  `nik` varchar(16) DEFAULT NULL,
   `foto` varchar(30) DEFAULT NULL,
-  `telp` int(13) DEFAULT NULL
+  `telp` varchar(13) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `saksi`
+--
+
+INSERT INTO `saksi` (`id`, `nama_depan`, `nama_belakang`, `gender`, `alamat`, `id_kel`, `id_kec`, `id_kab`, `id_prov`, `id_dapil`, `nik`, `foto`, `telp`) VALUES
+(1, 'Muhammad', 'Ainun', 'l', 'Jl. Kyai Singkil no.45', 1, 1, 1, 1, 1, '3340506880200001', 'foto1.jpg', '089668629038'),
+(2, 'Imam', 'Khilmi', 'l', 'Jl. Kyai Jebat no.11', 1, 1, 1, 1, 1, '3320506880230002', 'foto2.jpg', '081225678082');
 
 -- --------------------------------------------------------
 
@@ -203,8 +299,17 @@ CREATE TABLE `saksi` (
 CREATE TABLE `suara` (
   `id` int(2) NOT NULL,
   `suara` int(7) DEFAULT NULL,
-  `id_caleg` int(2) DEFAULT NULL
+  `id_caleg` int(2) DEFAULT NULL,
+  `id_saksi` int(3) DEFAULT NULL,
+  `tanggal` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `suara`
+--
+
+INSERT INTO `suara` (`id`, `suara`, `id_caleg`, `id_saksi`, `tanggal`) VALUES
+(1, 1200, 1, 1, '2018-06-09 16:20:22');
 
 -- --------------------------------------------------------
 
@@ -278,7 +383,8 @@ ALTER TABLE `partai`
 ALTER TABLE `proof`
   ADD PRIMARY KEY (`id`),
   ADD KEY `proof_ibfk_1` (`id_dapil`),
-  ADD KEY `proof_ibfk_2` (`id_kel`);
+  ADD KEY `proof_ibfk_2` (`id_kel`),
+  ADD KEY `proof_ibfk_3` (`id_saksi`);
 
 --
 -- Indexes for table `prov`
@@ -303,7 +409,8 @@ ALTER TABLE `saksi`
 --
 ALTER TABLE `suara`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `suara_ibfk_1` (`id_caleg`);
+  ADD KEY `suara_ibfk_1` (`id_caleg`),
+  ADD KEY `suara_ibfk_3` (`id_saksi`);
 
 --
 -- Indexes for table `users`
@@ -320,7 +427,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `caleg`
 --
 ALTER TABLE `caleg`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `dapil`
 --
@@ -340,17 +447,17 @@ ALTER TABLE `kec`
 -- AUTO_INCREMENT for table `kel`
 --
 ALTER TABLE `kel`
-  MODIFY `id` int(3) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `partai`
 --
 ALTER TABLE `partai`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `proof`
 --
 ALTER TABLE `proof`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `prov`
 --
@@ -360,12 +467,12 @@ ALTER TABLE `prov`
 -- AUTO_INCREMENT for table `saksi`
 --
 ALTER TABLE `saksi`
-  MODIFY `id` int(3) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `suara`
 --
 ALTER TABLE `suara`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `users`
 --
@@ -412,13 +519,13 @@ ALTER TABLE `kel`
 --
 ALTER TABLE `proof`
   ADD CONSTRAINT `proof_ibfk_1` FOREIGN KEY (`id_dapil`) REFERENCES `dapil` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `proof_ibfk_2` FOREIGN KEY (`id_kel`) REFERENCES `kel` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `proof_ibfk_2` FOREIGN KEY (`id_kel`) REFERENCES `kel` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `proof_ibfk_3` FOREIGN KEY (`id_saksi`) REFERENCES `saksi` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `saksi`
 --
 ALTER TABLE `saksi`
-  ADD CONSTRAINT `saksi_ibfk_1` FOREIGN KEY (`id`) REFERENCES `users` (`id_saksi`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `saksi_rel_dapil` FOREIGN KEY (`id_dapil`) REFERENCES `dapil` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `saksi_rel_kab` FOREIGN KEY (`id_kab`) REFERENCES `kab` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `saksi_rel_kec` FOREIGN KEY (`id_kec`) REFERENCES `kec` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -429,13 +536,14 @@ ALTER TABLE `saksi`
 -- Constraints for table `suara`
 --
 ALTER TABLE `suara`
-  ADD CONSTRAINT `suara_ibfk_1` FOREIGN KEY (`id_caleg`) REFERENCES `caleg` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD CONSTRAINT `suara_ibfk_1` FOREIGN KEY (`id_caleg`) REFERENCES `caleg` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `suara_ibfk_3` FOREIGN KEY (`id_saksi`) REFERENCES `saksi` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `users`
 --
 ALTER TABLE `users`
-  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`id_saksi`) REFERENCES `saksi` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`id_saksi`) REFERENCES `saksi` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
