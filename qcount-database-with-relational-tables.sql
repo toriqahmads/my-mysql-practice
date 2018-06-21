@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 20, 2018 at 09:23 AM
+-- Generation Time: Jun 21, 2018 at 07:57 AM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 7.1.1
 
@@ -26,88 +26,214 @@ DELIMITER $$
 --
 CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_data_caleg` (IN `ids` INT(2))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
+SET jml := (SELECT COUNT(*) FROM caleg WHERE id = ids AND status = 'l');
+
+IF jml>0 THEN
 UPDATE caleg SET status = 'd' WHERE id = ids;
 
-COMMIT;
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+SET msg = 'data not found';
+END IF;
+SELECT msg;
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_data_saksi` (IN `ids` INT(2))  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_data_saksi` (IN `ids` INT(2), IN `nomor_nik` VARCHAR(16))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
-UPDATE saksi SET status = 'd', nik = (SELECT CONCAT(nik, '+deleted')) WHERE id = ids;
+SET jml := (SELECT COUNT(*) FROM saksi WHERE id = ids AND nik = nomor_nik);
 
-UPDATE users SET status = 'd', username = (SELECT CONCAT(username, '+deleted')) WHERE id_saksi = ids;
+IF jml>0 THEN
+	UPDATE saksi SET status = 'd', nik = (SELECT CONCAT(nik, '+deleted')) WHERE id = ids;
 
-COMMIT;
+	UPDATE users SET status = 'd', username = (SELECT CONCAT(username, '+deleted')) WHERE id_saksi = ids;
+
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+
+ELSE
+	SET msg = 'data not found';
+END IF;
+SELECT msg;
 
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_proof` (IN `ids` INT(2))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
+SET jml := (SELECT COUNT(*) FROM proof WHERE id = ids AND status = 'l');
+
+IF jml>0 THEN
 UPDATE proof SET updated = NOW(), status = 'd' WHERE id = ids;
 
-COMMIT;
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data not found';
+END IF;
 
+SELECT msg;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_r_suara` (IN `ids` INT(2))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
+SET jml := (SELECT COUNT(*) FROM r_suara WHERE id = ids AND status = 'l');
+
+IF jml>0 THEN
 UPDATE r_suara SET updated = NOW(), status = 'd' WHERE id = ids;
 
-COMMIT;
-
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data not found';
+END IF;
+SELECT msg;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_suara` (IN `ids` INT(2))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
+SET jml := (SELECT COUNT(*) FROM suara WHERE id = ids AND status = 'l');
+
+IF jml>0 THEN
 UPDATE suara SET updated = NOW(), status = 'd' WHERE id = ids;
 
-COMMIT;
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data not found';
+END IF;
 
+SELECT msg;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `input_data_caleg` (IN `fname` VARCHAR(15), IN `lname` VARCHAR(15), IN `partai` INT(2), IN `dapil` INT(2), IN `prov` INT(2), IN `kab` INT(2), IN `kel` INT(2))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
 INSERT INTO caleg (nama_depan, nama_belakang, id_partai, id_dapil, id_prov, id_kab, id_kel) VALUES (fname, lname, partai, dapil, prov, kab, kel);
 
-COMMIT;
-
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+SELECT msg;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `input_data_saksi` (IN `fname` VARCHAR(15), IN `lname` VARCHAR(15), IN `sex` CHAR(1), IN `alamat` VARCHAR(30), IN `kel` INT(4), IN `kec` INT(2), IN `kab` INT(2), IN `prov` INT(2), IN `dapil` INT(2), IN `nomor_nik` VARCHAR(16), IN `photo` VARCHAR(30), IN `telpon` VARCHAR(13), IN `tps` INT(2), IN `passwd` VARCHAR(255))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+    GET DIAGNOSTICS CONDITION 1
+      code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+      SET rb = 1;
+END;
 
 START TRANSACTION;
 
@@ -116,137 +242,335 @@ INSERT INTO users (username, pass) VALUES (nomor_nik, passwd);
 INSERT INTO saksi (nama_depan, nama_belakang, gender, alamat, id_kel, id_kec, id_kab, id_prov, id_dapil, nik, foto, telp, id_tps)
 VALUES (fname, lname, sex, alamat, kel, kec, kab, prov, dapil, nomor_nik, photo, telpon, tps);
 
-COMMIT;
+IF code != '00000' OR rb = 1 THEN
+  ROLLBACK;
+ELSE
+  COMMIT;
+  SET msg = 'success';
+END IF;
+
+SELECT msg;
 
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `input_proof` (IN `photo` TEXT, IN `lokasi` VARCHAR(100), IN `dapil` INT(2), IN `tps` INT(2), IN `saksi` INT(3))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
+SET jml := (SELECT COUNT(*) FROM saksi WHERE id = ids AND status = 'l');
 
+IF jml>0 THEN
 INSERT INTO proof (foto, location, id_dapil, id_tps, id_saksi, tanggal, updated) VALUES (photo, lokasi, dapil, tps, saksi, NOW(), NOW());
 
-COMMIT;
-
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data for saksi not found';
+END IF;
+SELECT msg;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `input_r_suara` (IN `tipe` ENUM('a','b','c','d','cadangan'), IN `n` INT(5), IN `tingkatan` INT(2), IN `tps` INT(3))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
 INSERT INTO r_suara (jenis, jumlah, tingkat, id_tps, tanggal, updated) VALUES (tipe, n, tingkatan, tps, NOW(), NOW());
 
-COMMIT;
-
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+SELECT msg;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `input_suara` (IN `j_suara` INT(7), IN `caleg` INT(2), IN `saksi` INT(3), IN `tps` INT(3))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+DECLARE jml2 INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
+SET jml := (SELECT COUNT(*) FROM caleg WHERE id = ids AND status = 'l');
+SET jml2 := (SELECT COUNT(*) FROM saksi WHERE id = ids AND status = 'l');
 
+IF jml>0 AND jml2>0 THEN
 INSERT INTO suara (suara, id_caleg, id_saksi, tanggal, updated, id_tps) VALUES (j_suara, caleg, saksi, NOW(), NOW(), tps);
 
-COMMIT;
-
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data for caleg or saksi not found';
+END IF;
+SELECT msg;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `input_tps` (IN `n_tps` VARCHAR(5), IN `dapil` INT(2), IN `kel` INT(2), IN `kec` INT(2), IN `kab` INT(2), IN `prov` INT(2))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
 INSERT INTO tps (tps, id_dapil, id_kel, id_kec, id_kab, id_prov) VALUES (n_tps, dapil, kel, kec, kab, prov);
 
-COMMIT;
-
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+SELECT msg;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_data_caleg` (IN `ids` INT(2), IN `fname` VARCHAR(15), IN `lname` VARCHAR(15), IN `partai` INT(2), IN `dapil` INT(2), IN `prov` INT(2), IN `kab` INT(2), IN `kel` INT(2))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
+SET jml := (SELECT COUNT(*) FROM caleg WHERE id = ids);
+
+IF jml>0 THEN
 UPDATE caleg SET nama_depan = fname, nama_belakang = lname, id_partai = partai, id_dapil = dapil, id_prov = prov, id_kab = kab, id_kel = kel WHERE id = ids;
 
-COMMIT;
-
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data not found';
+END IF;
+SELECT msg;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_data_saksi` (IN `ids` INT(2), IN `fname` VARCHAR(15), IN `lname` VARCHAR(15), IN `sex` CHAR(1), IN `alamat` VARCHAR(30), IN `kel` INT(4), IN `kec` INT(2), IN `kab` INT(2), IN `prov` INT(2), IN `dapil` INT(2), IN `nomor_nik` VARCHAR(16), IN `photo` VARCHAR(30), IN `telpon` VARCHAR(13), IN `tps` INT(2))  BEGIN
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
+SET jml := (SELECT COUNT(*) FROM saksi WHERE id = ids AND nik = nomor_nik);
 
+IF jml>0 THEN
 UPDATE saksi SET nama_depan = fname, nama_belakang = lname, gender = sex, alamat = alamat, id_kel = kel, id_kec = kec, id_kab = kab, id_prov = prov, id_dapil = dapil, nik = nomor_nik, foto = photo, telp = telpon, id_tps = tps WHERE id = ids;
 
-COMMIT;
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data not found';
+END IF;
+SELECT msg;
 
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_proof` (IN `ids` INT(2), IN `photo` TEXT, IN `lokasi` VARCHAR(100), IN `dapil` INT(2), IN `tps` INT(2), IN `saksi` INT(3))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
+SET jml := (SELECT COUNT(*) FROM proof WHERE id = ids AND status = 'l');
+
+IF jml>0 THEN
 UPDATE proof SET foto = photo, location = lokasi, id_dapil = dapil, id_tps = tps, id_saksi = saksi, updated = NOW() WHERE id = ids;
 
-COMMIT;
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE 
+	SET msg = 'data not found';
+END IF;
+
+SELECT msg;
 
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_r_suara` (IN `ids` INT(2), IN `tipe` ENUM('a','b','c','d','cadangan'), IN `n` INT(5), IN `tingkatan` INT(2), IN `tps` INT(3))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
+SET jml := (SELECT COUNT(*) FROM r_suara WHERE id = ids AND status = 'l');
+
+IF jml>0 THEN
 UPDATE r_suara SET jenis = tipe, jumlah = n, tingkat = tingkatan, id_tps = tps WHERE id = ids;
 
-COMMIT;
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data not found';
+END IF;
+
+SELECT msg;
 
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_suara` (IN `ids` INT(2), IN `j_suara` INT(7), IN `caleg` INT(2), IN `saksi` INT(3), IN `tps` INT(2))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
 
+SET jml := (SELECT COUNT(*) FROM suara WHERE id = ids AND status = 'l');
+
+IF jml>0 THEN
 UPDATE suara SET suara = j_suara, id_caleg = caleg, id_saksi = saksi, id_tps = tps, updated = NOW() WHERE id = ids;
 
-COMMIT;
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data not found';
+END IF;
+
+SELECT msg;
 
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_tps` (IN `ids` INT(2), IN `n_tps` VARCHAR(5), IN `dapil` INT(2), IN `kel` INT(2), IN `kec` INT(2), IN `kab` INT(2), IN `prov` INT(2))  BEGIN
 
-DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
-ROLLBACK;
+DECLARE code CHAR(5) DEFAULT '00000';
+DECLARE msg TEXT;
+DECLARE rb BOOL DEFAULT 0;
+DECLARE jml INT(1);
+
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION, SQLWARNING, NOT FOUND
+BEGIN
+	GET DIAGNOSTICS CONDITION 1
+    code = RETURNED_SQLSTATE, msg = MESSAGE_TEXT;
+    SET rb = 1;
+END;
 
 START TRANSACTION;
+SET jml := (SELECT COUNT(*) FROM tps WHERE id = ids);
 
+IF jml>0 THEN
 UPDATE tps SET tps = n_tps, id_dapil = dapil, id_kel = kel, id_kec = kec, id_kab = kab, id_prov = prov WHERE id = ids;
 
-COMMIT;
+IF code != '00000' OR rb = 1 THEN
+	ROLLBACK;
+ELSE
+	COMMIT;
+    SET msg = 'success';
+END IF;
+ELSE
+	SET msg = 'data not found';
+END IF;
+SELECT msg;
 
 END$$
 
@@ -281,6 +605,13 @@ CREATE TABLE `caleg` (
   `id_kel` int(2) DEFAULT NULL,
   `status` char(1) NOT NULL DEFAULT 'l' COMMENT '''l'' untuk data masih digunakan, ''d'' untuk data sudah dihapus'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `caleg`
+--
+
+INSERT INTO `caleg` (`id`, `nama_depan`, `nama_belakang`, `id_partai`, `id_dapil`, `id_prov`, `id_kab`, `id_kel`, `status`) VALUES
+(2, 'Ahlis', 'MF', 1, 1, 1, 1, 1, 'd');
 
 -- --------------------------------------------------------
 
@@ -638,6 +969,13 @@ CREATE TABLE `partai` (
   `partai` varchar(15) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `partai`
+--
+
+INSERT INTO `partai` (`id`, `partai`) VALUES
+(1, 'Demokrat');
+
 -- --------------------------------------------------------
 
 --
@@ -720,7 +1058,8 @@ CREATE TABLE `saksi` (
 --
 
 INSERT INTO `saksi` (`id`, `nama_depan`, `nama_belakang`, `gender`, `alamat`, `id_kel`, `id_kec`, `id_kab`, `id_prov`, `id_dapil`, `nik`, `foto`, `telp`, `id_tps`, `status`) VALUES
-(1, 'Muhammad', 'Ali', 'l', 'Jl. Kyai Mughni no.42', 1, 1, 1, 1, 1, '330482398792369+deleted', 'images.jpg', '089667384823', 1, 'd');
+(1, 'Muhammad', 'Haimin', 'l', 'Jl. Kyai Singki no.45', 1, 1, 1, 1, 1, '337230934799234+deleted', 'Images2.jpg', '089667823877', 1, 'd'),
+(2, 'Rozikin', 'Ahmad', 'l', 'Jl. Pahlawan no.11', 1, 1, 1, 1, 1, '3340034987239080+deleted', 'rozik.jpg', '089668623899', 1, 'd');
 
 --
 -- Triggers `saksi`
@@ -746,6 +1085,13 @@ CREATE TABLE `suara` (
   `id_tps` int(3) DEFAULT NULL,
   `status` char(1) NOT NULL DEFAULT 'l' COMMENT '''l'' untuk data masih digunakan, ''d'' untuk data sudah dihapus'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `suara`
+--
+
+INSERT INTO `suara` (`id`, `suara`, `id_caleg`, `id_saksi`, `tanggal`, `updated`, `id_tps`, `status`) VALUES
+(1, 1400, 2, 1, '2018-06-21 12:48:26', '2018-06-21 12:54:52', 1, 'd');
 
 -- --------------------------------------------------------
 
@@ -789,7 +1135,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `pass`, `id_saksi`, `status`) VALUES
-(1, '330482398792369+deleted', 'asdAsasdjhc', 1, 'd');
+(1, '337230934799234+deleted', 'Kbps1234', 1, 'd'),
+(2, '3340034987239080+deleted', 'Mbps1234', 2, 'd');
 
 --
 -- Indexes for dumped tables
@@ -927,7 +1274,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `caleg`
 --
 ALTER TABLE `caleg`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `dapil`
 --
@@ -952,7 +1299,7 @@ ALTER TABLE `kel`
 -- AUTO_INCREMENT for table `partai`
 --
 ALTER TABLE `partai`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `proof`
 --
@@ -972,12 +1319,12 @@ ALTER TABLE `r_suara`
 -- AUTO_INCREMENT for table `saksi`
 --
 ALTER TABLE `saksi`
-  MODIFY `id` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT for table `suara`
 --
 ALTER TABLE `suara`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `tps`
 --
@@ -987,7 +1334,7 @@ ALTER TABLE `tps`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 --
 -- Constraints for dumped tables
 --
