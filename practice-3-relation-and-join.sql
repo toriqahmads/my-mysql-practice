@@ -41,6 +41,7 @@ INSERT INTO nilai VALUES
 ('04/11','CS633','A1',70,50);
 
 SELECT mhs.nama_mhs, mk.nama_mk, mk.sks_mk FROM mahasiswa AS mhs, matkul AS mk, nilai AS nl WHERE mhs.nim = nl.nim AND nl.kode_mk = mk.kode_mk;
+SELECT mhs.nim, mhs.nama_mhs, mk.nama_mk FROM mahasiswa AS mhs, matkul AS mk, nilai AS nl WHERE mhs.nim = nl.nim AND nl.kode_mk = mk.kode_mk ORDER BY mhs.nim ASC;
 SELECT mhs.nama_mhs, mk.nama_mk, nl.nilai_tengah, nl.nilai_akhir FROM mahasiswa AS mhs, matkul AS mk, nilai AS nl WHERE mhs.nim = nl.nim AND nl.kode_mk = mk.kode_mk AND mk.nama_mk = 'Analisis Algoritma' ORDER BY (nl.nilai_akhir + nl.nilai_tengah) DESC;
 SELECT mhs.* FROM mahasiswa AS mhs WHERE mhs.nim NOT IN (SELECT nilai.nim FROM nilai);
 SELECT mk.* FROM matkul AS mk WHERE mk.kode_mk NOT IN (SELECT nilai.kode_mk FROM nilai);
